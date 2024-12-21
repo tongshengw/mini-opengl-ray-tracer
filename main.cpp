@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <vector>
+#include <array>
 
 #include "LinearAlgebra.hpp"
 
@@ -89,6 +90,39 @@ public:
         if (aFound && bFound && cFound) {
             v3<int> output{outA, outB, outC};
             triangles.push_back(output);
+        } else {
+            int counter = 0;
+            if (!aFound) {
+                outA = vertices.size() + counter;
+                vertices.push_back(a);
+                counter++;
+            }
+            if (!bFound) {
+                outB = triangles.size() + counter;
+                vertices.push_back(b);
+                counter++;
+            }
+            if (!cFound) {
+                outC = triangles.size() + counter;
+                vertices.push_back(c);
+                counter++;
+            }
+            v3<int> output{outA, outB, outC};
+            triangles.push_back(output);
+        }
+    }
+
+    std::array<v3<float>, 3> at(int i) {
+        if (i >= triangles.size() || i < 0) {
+            class TrianglesIndexPastEndError{};
+            throw TrianglesIndexPastEndError{};
+        } else {
+            std::array<v3<float>, 3> output;
+            output[0] = vertices[triangles[i].x];
+            output[1] = vertices[triangles[i].y];
+            output[2] = vertices[triangles[i].z];
+
+            return output;
         }
     }
 

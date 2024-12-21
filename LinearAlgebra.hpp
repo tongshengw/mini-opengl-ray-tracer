@@ -4,6 +4,8 @@
 template<typename T>
 class v3 {
 public:
+    v3() :x(0), y(0), z(0) {}
+
     v3(T x, T y, T z) 
 	:x(x), y(y), z(z) {}
 
