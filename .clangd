@@ -6,5 +6,9 @@ CompileFlags:
     "-lmingw32",
     "-lSDL2main",
     "-lSDL2",
+    "-Wall",
+    "-Werror",
+    "-pedantic",
+
   ]
   Remove: -f*

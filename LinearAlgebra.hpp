@@ -18,4 +18,13 @@ public:
     T z;
 };
 
+class Triangle {
+public:
+    Triangle(v3<float> a, v3<float> b, v3<float> c)
+	:a(a), b(b), c(c) {}
+    v3<float> a;
+    v3<float> b;
+    v3<float> c;
+};
+
 #endif
