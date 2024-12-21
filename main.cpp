@@ -4,16 +4,23 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
-#include <array>
 #include <cmath>
 #include <unordered_map>
 
 #include "LinearAlgebra.hpp"
+#include "Triangles.hpp"
 
 #define SCREEN_WIDTH 1280 
 #define SCREEN_HEIGHT 720
 
 class Screen {
+private:
+
+    SDL_Window* win;
+    SDL_Renderer* renderer;
+
+    std::vector<SDL_FPoint> points;
+
 public:
     Screen() {
         SDL_Init(SDL_INIT_EVERYTHING);
@@ -31,8 +38,6 @@ public:
             class CreateWindowError{};
             throw CreateWindowError{};
         }
-
-        
     }
 
     void add_point(float x, float y) {
@@ -64,11 +69,12 @@ private:
         drawLine(edgePoints, t.b.x, t.b.y, t.c.x, t.c.y);
         drawLine(edgePoints, t.a.x, t.a.y, t.c.x, t.c.y);
 
-        std::unordered_map<int, std::pair<int, int>> temp;
+        std::unordered_map<int, std::pair<int, int>> throwaway;
         for (std::pair<int, std::pair<int, int>> pair : edgePoints) {
-            drawLine(temp, pair.first, pair.second.first, pair.first, pair.second.second);
+            if (pair.second.first != -1 && pair.second.second != -1) {
+                drawLine(throwaway, pair.first, pair.second.first, pair.first, pair.second.second);
+            }
         }
-        
     }
 
     void drawLine(std::unordered_map<int, std::pair<int, int>> &edgePoints, float x1, float y1, float x2, float y2) {
@@ -142,83 +148,9 @@ private:
             }
         }
     }
-
-    SDL_Window* win;
-    SDL_Renderer* renderer;
-
-    std::vector<SDL_FPoint> points;
 };
 
 
-class Triangles {
-public:
-
-    int size() {
-        return triangles.size();
-    }
-
-    void add_triangle(v3<float> a, v3<float> b, v3<float> c) {
-        bool aFound = false;
-        bool bFound = false;
-        bool cFound = false;
-        int outA;
-        int outB;
-        int outC;
-
-        int i = 0;
-        while ((!aFound || !bFound || !cFound) && i < (int) vertices.size()) {
-            if (!aFound && vertices[i] == a) {
-                outA = i;
-            }
-            if (!bFound && vertices[i] == b) {
-                outB = i;
-            }
-            if (!cFound && vertices[i] == c) {
-                outC = i;
-            }
-        }
-        if (aFound && bFound && cFound) {
-            std::array<int, 3> output{outA, outB, outC};
-            triangles.push_back(output);
-        } else {
-            int counter = 0;
-            if (!aFound) {
-                outA = vertices.size() + counter;
-                vertices.push_back(a);
-                counter++;
-            }
-            if (!bFound) {
-                outB = triangles.size() + counter;
-                vertices.push_back(b);
-                counter++;
-            }
-            if (!cFound) {
-                outC = triangles.size() + counter;
-                vertices.push_back(c);
-                counter++;
-            }
-            std::array<int, 3> output{outA, outB, outC};
-            triangles.push_back(output);
-        }
-    }
-
-    Triangle at(int i) {
-        if (i >= (int) triangles.size() || i < 0) {
-            class TrianglesIndexPastEndError{};
-            throw TrianglesIndexPastEndError{};
-        } else {
-            Triangle output(vertices[triangles[i][0]], vertices[triangles[i][1]], vertices[triangles[i][2]]);
-
-            return output;
-        }
-    }
-
-private:
-    std::vector<v3<float>> vertices;
-
-    // triagles use the index of each vertex in the vertices vector. 
-    std::vector<std::array<int, 3>> triangles;
-};
 
 int main(int argc, char** argv){
     
