@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 
+#include "LinearAlgebra.hpp"
+
 #define SCREEN_WIDTH 1280 
 #define SCREEN_HEIGHT 720
 
@@ -58,6 +60,43 @@ private:
 
     std::vector<SDL_FPoint> points;
     
+};
+
+
+class Triangles {
+public:
+
+    void add_triangle(v3<float> a, v3<float> b, v3<float> c) {
+        bool aFound = false;
+        bool bFound = false;
+        bool cFound = false;
+        int outA;
+        int outB;
+        int outC;
+
+        int i = 0;
+        while ((!aFound || !bFound || !cFound) && i < vertices.size()) {
+            if (!aFound && vertices[i] == a) {
+                outA = i;
+            }
+            if (!bFound && vertices[i] == b) {
+                outB = i;
+            }
+            if (!cFound && vertices[i] == c) {
+                outC = i;
+            }
+        }
+        if (aFound && bFound && cFound) {
+            v3<int> output{outA, outB, outC};
+            triangles.push_back(output);
+        }
+    }
+
+private:
+    std::vector<v3<float>> vertices;
+
+    // triagles use the index of each vertex in the vertices vector. 
+    std::vector<v3<int>> triangles;
 };
 
 int main(int argc, char** argv){
