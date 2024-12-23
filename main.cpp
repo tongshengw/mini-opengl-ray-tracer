@@ -1,5 +1,7 @@
+#include "SDL2/SDL_error.h"
 #include "SDL2/SDL_events.h"
 #include "SDL2/SDL_rect.h"
+#include "glad/glad.h"
 #include <SDL2/SDL.h>
 #include <cstdlib>
 #include <iostream>
@@ -8,27 +10,35 @@
 #include <unordered_map>
 
 #include "LinearAlgebra.hpp"
+#include "SDL2/SDL_video.h"
 #include "Triangles.hpp"
 
 #define SCREEN_WIDTH 1280 
 #define SCREEN_HEIGHT 720
 
 class Screen {
-private:
+public:
 
     SDL_Window* win;
-    SDL_Renderer* renderer;
+    SDL_GLContext OpenGLcontext;
 
     std::vector<SDL_FPoint> points;
 
 public:
     Screen() {
         SDL_Init(SDL_INIT_EVERYTHING);
-        win = SDL_CreateWindow("test name", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 
-        renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-        if (renderer == nullptr) {
-            std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
+        win = SDL_CreateWindow("test name", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL);
+
+        OpenGLcontext = SDL_GL_CreateContext(win);
+        if (!OpenGLcontext) {
+            std::cout << "FAILED: create opengl contect" << SDL_GetError() << std::endl;
             class CreateRendererError{};
             throw CreateRendererError{};
         }
@@ -38,28 +48,43 @@ public:
             class CreateWindowError{};
             throw CreateWindowError{};
         }
+        // Initialises GLAD
+        if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
+            std::cout << "FAILED: glad loading" << SDL_GetError() << std::endl;
+            class LoadGladError{};
+            throw LoadGladError{};
+        }
+
+        printOpenGLInfo();
     }
 
+    void PreDraw() {
+
+    }
+    
+    void Draw() {
+
+    }
     void add_point(float x, float y) {
         SDL_FPoint p{x, y};
         points.push_back(p);
     }
 
     void render() {
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        SDL_RenderClear(renderer);
-
-        Triangle test({100, 100, 0}, {500, 500, 0}, {100, 300, 0});
-        drawTriangle(test);
-
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        for (SDL_FPoint p : points) {
-            SDL_RenderDrawPointF(renderer, p.x, p.y);
-        }
-
-        points.clear();
-
-        SDL_RenderPresent(renderer);
+        // SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        // SDL_RenderClear(renderer);
+        //
+        // Triangle test({100, 100, 0}, {500, 500, 0}, {100, 300, 0});
+        // drawTriangle(test);
+        //
+        // SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        // for (SDL_FPoint p : points) {
+        //     SDL_RenderDrawPointF(renderer, p.x, p.y);
+        // }
+        //
+        // points.clear();
+        //
+        // SDL_RenderPresent(renderer);
     } 
     
 private:
@@ -149,6 +174,11 @@ private:
             }
         }
     }
+
+    void printOpenGLInfo() {
+        std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+        std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+    }
 };
 
 
@@ -157,6 +187,7 @@ int main(int argc, char** argv){
     
     Screen screen;
 
+    // NOTE: Main loop
     bool running = true;
     while(running){
         SDL_Event event;
@@ -164,6 +195,7 @@ int main(int argc, char** argv){
             switch(event.type){
                 case SDL_QUIT:
                     running = false;
+                    SDL_DestroyWindow(screen.win);
                     break;
 
                 default:
@@ -171,8 +203,9 @@ int main(int argc, char** argv){
             }
         }
 
-        screen.render();
-
+        screen.PreDraw();
+        screen.Draw();
+        SDL_GL_SwapWindow(screen.win);
     }
 
     return 0;
