@@ -77,6 +77,7 @@ private:
         }
     }
 
+    // NOTE: This function takes in 2 points and draws a line between these two points. This function also takes a unordered_map reference and pushes drawn points and their row to the map.
     void drawLine(std::unordered_map<int, std::pair<int, int>> &edgePoints, float x1, float y1, float x2, float y2) {
         if (std::abs(y2-y1) < std::abs(x2-x1)) {
             if (x1 > x2) {
