@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+#include "LinearAlgebra.hpp"
 #include "SDL2/SDL_video.h"
 
 #define SCREEN_WIDTH 1280 
@@ -75,12 +76,7 @@ public:
         glBindVertexArray(vertexArrayObject);
         glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-    }
-
-    void add_point(float x, float y) {
-        SDL_FPoint p{x, y};
-        points.push_back(p);
+        glDrawArrays(GL_POINTS, 0, 3);
     }
 
 private:
@@ -148,6 +144,14 @@ private:
         std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
         std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
     }
+};
+
+class Camera {
+private:
+    v4<float> pos;
+
+public:
+
 };
 
 
