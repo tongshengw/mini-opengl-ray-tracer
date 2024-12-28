@@ -1,6 +1,7 @@
 #include "SDL2/SDL_error.h"
 #include "SDL2/SDL_events.h"
 #include "SDL2/SDL_rect.h"
+#include "SDL2/SDL_stdinc.h"
 #include "glad/glad.h"
 #include <SDL2/SDL.h>
 #include <fstream>
@@ -70,20 +71,29 @@ public:
         glClearColor(1.f, 1.f, 0.f, 1.f);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         glUseProgram(graphicsPipelineShaders);
+
+        GLint u_CameraMatrixLocation = glGetUniformLocation(graphicsPipelineShaders, "u_CameraMatrix");
+
+        // WARNING: replace nullptr with a camera matrix location
+        glUniformMatrix4fv(u_CameraMatrixLocation, 1, GL_FALSE, nullptr);
     }
     
     void Draw() {
         glBindVertexArray(vertexArrayObject);
         glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
 
-        glDrawArrays(GL_POINTS, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
     }
 
 private:
     std::vector<GLfloat> tempTriangle{
         0.2, 0.2, 0.f,
-        0.3, 0.1, 0.f,
-        0.1, 0.1, 0.f
+        0.3, 0.2, 0.f,
+        0.2, 0.3, 0.f,
+
+        0.f, 0.f, 0.f, 
+        0.1, 0.f, 0.f,
+        0.f, 0.1, 0.f
     };
 
     // NOTE: OpenGL objects
@@ -101,7 +111,7 @@ private:
         glBufferData(GL_ARRAY_BUFFER, tempTriangle.size() * sizeof(GLfloat), tempTriangle.data(), GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
         glBindVertexArray(0);
         glDisableVertexAttribArray(0);
@@ -146,11 +156,38 @@ private:
     }
 };
 
+class Scene {
+
+};
+
 class Camera {
 private:
-    v4<float> pos;
+    v3<float> pos;
+    Quaternion rotation;
+    float hFOV = M_PI/4;
+    float closePlane;
+    float farPlane;
 
 public:
+    m44<float> perspectiveMatrix() const {
+        float f = farPlane;
+        float n = closePlane;
+
+        float l = 0;
+        float r = 0;
+        float t = 0;
+        float b = 0;
+        
+        // double curly brackets because init an array, then init the m44
+        return {
+            {
+                2*n/(r-l), 0, (r+l)/(r-l), 0,
+                0, 2*n/(t-b), (t+b)/(t-b), 0,
+                0, 0, -(f+n)/(f-n), -2*f*n/(f-n),
+                0, 0, -1, 0
+            }
+        };
+    }
 
 };
 

@@ -3,30 +3,78 @@
 
 #include <array>
 #include <cmath>
+#include <iostream>
+
+template<typename T>
+class v4; // Forward declaration
+
 template<typename T>
 class v3 {
 public:
-    v3() :x(0), y(0), z(0) {}
+    v3()
+        :x(0), y(0), z(0) {}
 
     v3(T x, T y, T z) 
-	:x(x), y(y), z(z) {}
+	    :x(x), y(y), z(z) {}
 
-    bool operator==(const v3<T> &rhs) {
-	return x == rhs.x && y == rhs.y && z == rhs.z;
+    v3(v4<T> input)
+        : v3(input.x, input.y, input.z) {}
+
+    bool operator==(const v3<T> &rhs) const {
+        return x == rhs.x && y == rhs.y && z == rhs.z;
+    }
+
+    v3<T> operator+(v3<T> rhs) {
+        return v3{x+rhs.x, y+rhs.y, z+rhs.z};
+    }
+
+    v3<T> operator-(v3<T> rhs) {
+        return v3{x-rhs.x, y-rhs.y, z-rhs.z};
+    }
+
+    v3<T> operator-() {
+        return v3{-x, -y, -z};
+    }
+
+    v3<T> operator*(float rhs) {
+        return v3{x*rhs, y*rhs, z*rhs};
+    }
+
+    T dot(const v3<T> &rhs) const {
+        return x*rhs.x + y*rhs.y + z*rhs.z;
+    }
+
+    v3<T> cross(const v3<T> &rhs) const {
+        return v3<T>{
+            y * rhs.z - z * rhs.y,
+            z * rhs.x - x * rhs.z,
+            x * rhs.y - y * rhs.x
+        };
     }
 
     T x;
     T y;
     T z;
+
 };
+
+template<typename T>
+v3<T> operator*(float scalar, v3<T> vector) {
+    return vector*scalar;
+}
 
 template<typename T>
 class v4 {
 public:
-    v4() :x(0), y(0), z(0), w(0) {}
+
+    v4(T x, T y, T z, T w)
+        : x(x), y(y), z(z), w(w) {}
+
+    v4()
+        : v4(0, 0, 0, 1) {}
 
     v4(T x, T y, T z) 
-	:x(x), y(y), z(z), w(w) {}
+        : v4(x, y, z, w) {}
 
     bool operator==(const v4<T> &rhs) {
 	return x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w;
@@ -57,7 +105,7 @@ public:
     }
 
     // Constructor with 16 elements
-    m44(const array<T, 16>& elements)
+    m44(const std::array<T, 16>& elements)
         : data(elements) {}
 
     // Access operators (row, col)
@@ -116,14 +164,16 @@ public:
     float j;
     float k;
 
-    Quaternion()
-        : r(1), i(0), j(0), k(0) {}
-    
-    Quaternion(const std::array<float, 4> &input)
-        : r(input[0]), i(input[1]), j(input[2]), k(input[3]) {}
+    Quaternion(float r, float i, float j, float k)
+        : r(r), i(i), j(j), k(k) {
+        enforce_normalisation();
+    }
 
+    Quaternion()
+        : Quaternion(1, 0, 0, 0) {}
+    
     Quaternion(const std::array<float, 3> &imaginary, float theta)
-        : i(imaginary[0]*cos(theta)), j(imaginary[1]*cos(theta)), k(imaginary[1]*sin(theta)), r(sin(theta)) {}
+        : Quaternion(sin(theta/2), imaginary[0]*cos(theta/2), imaginary[1]*cos(theta/2), imaginary[2]*cos(theta/2)) {}
 
     void normalise() {
         float length = sqrt(pow(r, 2)+pow(i, 2)+pow(j, 2)+pow(k, 2));
@@ -137,21 +187,43 @@ public:
         return sqrt(pow(r, 2)+pow(i, 2)+pow(j, 2)+pow(k, 2));
     }
 
-    Quaternion inverse() const {
+    Quaternion conjugate() const {
         return Quaternion({r, -i, -j, -k});
     }
 
-    m44<float> & multiply(m44<float>) {
-        
+    Quaternion operator*(const Quaternion &rhs) {
+        return Quaternion({
+            r * rhs.r - i * rhs.i - j * rhs.j - k * rhs.k,
+            r * rhs.i + i * rhs.r + j * rhs.k - k * rhs.j,
+            r * rhs.j - i * rhs.k + j * rhs.r + k * rhs.i,
+            r * rhs.k + i * rhs.j - j * rhs.i + k * rhs.r
+        });
     }
 
-    m44<float> & conjugation(m44<float>) {
-
+    void enforce_normalisation() {
+        if (magnitude() >= 1.001 || magnitude() <0.999) {
+            normalise();
+            std::cout << "WARNING: initialised non-normalised quaternion, quaternion automatically normalised" << std::endl;
+        }
     }
 
+    std::pair<v3<float>, float> get_rotation_axis_angle() {
+        enforce_normalisation();
 
-private:
-    
+        std::pair<v3<float>, float> output;
+        float theta = asin(r);
+        output.second = theta;
+
+        output.first = {i/cos(theta), j/cos(theta), k/cos(theta)};
+
+        return output;
+    }
+
+    v3<float> rotate_vector(v3<float> rhs) {
+        Quaternion p{0, rhs.x, rhs.y, rhs.z};
+        Quaternion result = (*this) * p * conjugate();
+        return {result.i, result.j, result.k}; 
+    }
 };
 
 #endif
