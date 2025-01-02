@@ -16,6 +16,73 @@
 #define SCREEN_WIDTH 1280 
 #define SCREEN_HEIGHT 720
 
+class Camera {
+private:
+    v3<float> pos;
+    Quaternion rotation;
+    float hFOV;
+    float aspectRatio;
+    float closePlane;
+    float farPlane;
+
+    v3<float> initial_orientation{0, 0, -1};
+
+public:
+    Camera()
+        : pos({{0,0,0}}), hFOV(M_PI/4), aspectRatio(0.5625), closePlane(0.1), farPlane(10) {}
+
+    Camera(v3<float>pos, Quaternion rotation, float hFOV, float closePlane, float farPlane, float aspectRatio)
+        : pos(pos), rotation(rotation), hFOV(hFOV), aspectRatio(aspectRatio), closePlane(closePlane), farPlane(farPlane){}
+
+    m44<float> perspectiveMatrix() const {
+        float f = farPlane;
+        float n = closePlane;
+
+        // This is equivalent to the OpenGL glFrustum matrix
+        float l = -tan(hFOV) * closePlane;
+        float r = tan(hFOV) * closePlane;
+        float t = r*aspectRatio;
+        float b = -r*aspectRatio;
+        
+        // double curly brackets because init an array, then init the m44
+        return {
+            {
+                2*n/(r-l), 0, (r+l)/(r-l), 0,
+                0, 2*n/(t-b), (t+b)/(t-b), 0,
+                0, 0, -(f+n)/(f-n), -2*f*n/(f-n),
+                0, 0, -1, 0
+            }
+        };
+    }
+
+    m44<float> viewMatrix() const {
+        v3<float> xaxis{1, 0, 0};
+        v3<float> yaxis{0, 1, 0};
+        v3<float> zaxis{0, 0, 1};
+
+        // This uses the conjugate as rotation represents the rotation of the camera, and we need to rotate world space points by the inverse and translate it in the opposite direction to convert into view space. https://www.songho.ca/opengl/gl_transform.html (Model-view matrix section)
+
+        xaxis = rotation.conjugate().rotate_vector(xaxis);
+        yaxis = rotation.conjugate().rotate_vector(yaxis);
+        zaxis = rotation.conjugate().rotate_vector(zaxis);
+
+        return {{
+            xaxis.x, yaxis.x, zaxis.x, -pos.x,
+            xaxis.y, yaxis.y, zaxis.y, -pos.y,
+            xaxis.z, yaxis.z, zaxis.z, -pos.z,
+            0, 0, 0, 1
+        }};
+    }
+
+};
+
+class Scene {
+
+};
+
+
+
+
 class Screen {
 public:
 
@@ -72,10 +139,12 @@ public:
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         glUseProgram(graphicsPipelineShaders);
 
+        m44<float> CameraMatrix = camera.viewMatrix() * camera.perspectiveMatrix();
+
         GLint u_CameraMatrixLocation = glGetUniformLocation(graphicsPipelineShaders, "u_CameraMatrix");
 
         // WARNING: replace nullptr with a camera matrix location
-        glUniformMatrix4fv(u_CameraMatrixLocation, 1, GL_FALSE, nullptr);
+        glUniformMatrix4fv(u_CameraMatrixLocation, 1, GL_TRUE, CameraMatrix.data.data());
     }
     
     void Draw() {
@@ -86,14 +155,16 @@ public:
     }
 
 private:
-    std::vector<GLfloat> tempTriangle{
-        0.2, 0.2, 0.f,
-        0.3, 0.2, 0.f,
-        0.2, 0.3, 0.f,
+    Camera camera;
 
-        0.f, 0.f, 0.f, 
-        0.1, 0.f, 0.f,
-        0.f, 0.1, 0.f
+    std::vector<GLfloat> tempTriangle{
+        0.2, 0.2, -10.f,
+        0.3, 0.2, -10.f,
+        0.2, 0.3, -10.f,
+
+        0.f, 0.f, -5.f, 
+        0.1, 0.f, -5.f,
+        0.f, 0.1, -5.f
     };
 
     // NOTE: OpenGL objects
@@ -155,42 +226,6 @@ private:
         std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
     }
 };
-
-class Scene {
-
-};
-
-class Camera {
-private:
-    v3<float> pos;
-    Quaternion rotation;
-    float hFOV = M_PI/4;
-    float closePlane;
-    float farPlane;
-
-public:
-    m44<float> perspectiveMatrix() const {
-        float f = farPlane;
-        float n = closePlane;
-
-        float l = 0;
-        float r = 0;
-        float t = 0;
-        float b = 0;
-        
-        // double curly brackets because init an array, then init the m44
-        return {
-            {
-                2*n/(r-l), 0, (r+l)/(r-l), 0,
-                0, 2*n/(t-b), (t+b)/(t-b), 0,
-                0, 0, -(f+n)/(f-n), -2*f*n/(f-n),
-                0, 0, -1, 0
-            }
-        };
-    }
-
-};
-
 
 
 int main(int argc, char** argv){

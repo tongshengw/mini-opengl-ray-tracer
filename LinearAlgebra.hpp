@@ -74,7 +74,7 @@ public:
         : v4(0, 0, 0, 1) {}
 
     v4(T x, T y, T z) 
-        : v4(x, y, z, w) {}
+        : v4(x, y, z, 1) {}
 
     bool operator==(const v4<T> &rhs) {
 	return x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w;
@@ -90,13 +90,13 @@ public:
 |a, b, c, d|
 |e, f, g, h|
 |i, j, k, l|
+|m, n, o, p|
 */
 template<typename T>
 class m44 {
-private:
-    std::array<T, 16> data;
-    
 public:
+    std::array<T, 16> data;
+
     // Default constructor - identity matrix
     m44() {
         for(int i = 0; i < 16; i++) {
@@ -126,7 +126,6 @@ public:
         return data[index];
     }
 
-private:
     //Matrix multiplication
     m44<T> multiply(const m44<T>& rhs) const {
         std::array<T, 16> result;
@@ -212,9 +211,9 @@ public:
 
         std::pair<v3<float>, float> output;
         float theta = asin(r);
-        output.second = theta;
+        output.second = theta*2;
 
-        output.first = {i/cos(theta), j/cos(theta), k/cos(theta)};
+        output.first = {i/(static_cast<float>(cos(theta))), j/(static_cast<float>(cos(theta))), k/(static_cast<float>(cos(theta)))};
 
         return output;
     }
