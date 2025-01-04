@@ -59,6 +59,12 @@ public:
 };
 
 template<typename T>
+std::ostream & operator<<(std::ostream &os, v3<T> v) {
+    os<<"("<<v.x<<", "<<v.y<<", "<<v.z<<")";
+    return os;
+}
+
+template<typename T>
 v3<T> operator*(float scalar, v3<T> vector) {
     return vector*scalar;
 }
