@@ -29,10 +29,16 @@ private:
 
 public:
     Camera()
-        : pos({{0,0,0}}), hFOV(M_PI/4), aspectRatio(0.5625), closePlane(0.1), farPlane(10) {}
+        : pos({{0,0,0}}), hFOV(M_PI/4), aspectRatio(0.5625), closePlane(0.1), farPlane(100) {}
 
     Camera(v3<float>pos, Quaternion rotation, float hFOV, float closePlane, float farPlane, float aspectRatio)
         : pos(pos), rotation(rotation), hFOV(hFOV), aspectRatio(aspectRatio), closePlane(closePlane), farPlane(farPlane){}
+
+    void move_forwards(float n) {
+        v3<float> direction_vector = rotation.rotate_vector(initial_orientation);
+
+        pos = pos + n * direction_vector;
+    }
 
     m44<float> perspectiveMatrix() const {
         float f = farPlane;
@@ -139,12 +145,13 @@ public:
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         glUseProgram(graphicsPipelineShaders);
 
-        m44<float> CameraMatrix = camera.viewMatrix() * camera.perspectiveMatrix();
-
+        m44<float> CameraMatrix = camera.perspectiveMatrix() * camera.viewMatrix();
         GLint u_CameraMatrixLocation = glGetUniformLocation(graphicsPipelineShaders, "u_CameraMatrix");
-
-        // WARNING: replace nullptr with a camera matrix location
         glUniformMatrix4fv(u_CameraMatrixLocation, 1, GL_TRUE, CameraMatrix.data.data());
+
+        m44<float> ModelMatrix;
+        GLint u_ModelMatrixLocation = glGetUniformLocation(graphicsPipelineShaders, "u_ModelMatrix");
+        glUniformMatrix4fv(u_ModelMatrixLocation, 1, GL_TRUE, ModelMatrix.data.data());
     }
     
     void Draw() {
@@ -153,10 +160,10 @@ public:
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
-
-private:
+public:
     Camera camera;
 
+private:
     std::vector<GLfloat> tempTriangle{
         0.2, 0.2, -10.f,
         0.3, 0.2, -10.f,
@@ -229,9 +236,9 @@ private:
 
 
 int main(int argc, char** argv){
-    std::ifstream vs("VertexShader.glsl");
+    std::ifstream vs("./shaders/vert.glsl");
     std::stringstream vsSS;
-    std::ifstream fs("FragmentShader.glsl");
+    std::ifstream fs("./shaders/frag.glsl");
     std::stringstream fsSS;
     if (vs && fs) {
         vsSS << vs.rdbuf();
@@ -260,6 +267,14 @@ int main(int argc, char** argv){
                 default:
                     break;
             }
+        }
+
+        const Uint8 *state = SDL_GetKeyboardState(NULL);
+        if (state[SDL_SCANCODE_UP]) {
+            screen.camera.move_forwards(0.01f);
+        }
+        if (state[SDL_SCANCODE_DOWN]) {
+            screen.camera.move_forwards(-0.01f);
         }
 
         screen.PreDraw();
