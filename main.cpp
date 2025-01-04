@@ -136,9 +136,6 @@ public:
     }
 
     void PreDraw() {
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_CULL_FACE);
-
         glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
         glClearColor(0.6f, 0.6f, 0.6f, 1.f);
@@ -165,13 +162,13 @@ public:
 
 private:
     std::vector<GLfloat> tempTriangle{
-        0.2, 0.2, -10.f,
-        0.3, 0.2, -10.f,
-        0.2, 0.3, -10.f,
+        -1.0f, -0.5625f, -1.0f,
+        -1.0f, 0.5625f, -1.0f,
+        1, -0.5625f, -1.0f,
 
-        0.f, 0.f, -5.f, 
-        0.1, 0.f, -5.f,
-        0.f, 0.1, -5.f
+        -1.0f, 0.5625f, -1.0f,
+        1, -0.5625f, -1.0f,
+        1.0f, 0.5625f, -1.0f
     };
 
     // NOTE: OpenGL objects
