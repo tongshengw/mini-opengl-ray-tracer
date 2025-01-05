@@ -40,6 +40,14 @@ public:
         pos = pos + n * direction_vector;
     }
 
+    v3<float> get_pos() const {
+        return pos;
+    }
+    
+    v3<float> get_dir() const {
+        return rotation.rotate_vector(initial_orientation);
+    }
+
     m44<float> perspectiveMatrix() const {
         float f = farPlane;
         float n = closePlane;
@@ -149,6 +157,15 @@ public:
         m44<float> ModelMatrix;
         GLint u_ModelMatrixLocation = glGetUniformLocation(graphicsPipelineShaders, "u_ModelMatrix");
         glUniformMatrix4fv(u_ModelMatrixLocation, 1, GL_TRUE, ModelMatrix.data.data());
+
+        GLint u_CameraPosLocation = glGetUniformLocation(graphicsPipelineShaders, "u_CameraPos");
+        glUniform3f(u_CameraPosLocation, camera.get_pos().x, camera.get_pos().y, camera.get_pos().z);
+
+        GLint u_CameraDirLocation = glGetUniformLocation(graphicsPipelineShaders, "u_CameraDir");
+        glUniform3f(u_CameraDirLocation, camera.get_dir().x, camera.get_dir().y, camera.get_dir().z);
+
+        GLint u_LightPosLocation = glGetUniformLocation(graphicsPipelineShaders, "u_LightPos");
+        glUniform3f(u_LightPosLocation, 0.0f, 0.0f, 20.0f);
     }
     
     void Draw() {

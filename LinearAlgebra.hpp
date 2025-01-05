@@ -196,7 +196,7 @@ public:
         return Quaternion({r, -i, -j, -k});
     }
 
-    Quaternion operator*(const Quaternion &rhs) {
+    Quaternion operator*(const Quaternion &rhs) const {
         return Quaternion({
             r * rhs.r - i * rhs.i - j * rhs.j - k * rhs.k,
             r * rhs.i + i * rhs.r + j * rhs.k - k * rhs.j,
@@ -224,7 +224,7 @@ public:
         return output;
     }
 
-    v3<float> rotate_vector(v3<float> rhs) {
+    v3<float> rotate_vector(v3<float> rhs) const {
         Quaternion p{0, rhs.x, rhs.y, rhs.z};
         Quaternion result = (*this) * p * conjugate();
         return {result.i, result.j, result.k}; 
