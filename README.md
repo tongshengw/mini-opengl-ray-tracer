@@ -1,3 +1,3 @@
-# gravity-sim
+# Mini OpenGL ray tracer
 
-This is a C++ 3D renderer and gravity simulation built using SDL 2
+This is a C++ OpenGl ray tracer!!
