@@ -73,9 +73,9 @@ void main() {
     // uint randseed = gl_FragCoord.x * gl_FragCoord.y * u_RandSeed;
     
     Ray ray;
-    ray.direction = {(2/1280) * gl_FragCoord.x - 1, (2*0.5625/720) * gl_FragCoord.y - 0.5625, -1};
+    ray.direction = vec3((2/1280) * gl_FragCoord.x - 1, (2*0.5625/720) * gl_FragCoord.y - 0.5625, -1);
     ray.direction = normalize(ray.direction);
-    ray.origin = {0.0f, 0.0f, 0.0f};
+    ray.origin = vec3(0.0f, 0.0f, 0.0f);
 
     float minIntersectDistance = 1000;
     float intersectedSphereIndex = -1;
