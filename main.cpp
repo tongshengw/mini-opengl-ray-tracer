@@ -186,11 +186,12 @@ public:
         GLint u_LightRadiusLocation = glGetUniformLocation(graphicsPipelineShaders, "u_LightRadius");
         glUniform1f(u_LightRadiusLocation, 0.1f);
 
-        float sphereLocations[9] = {0.0f, 0.0f, -5.0f, 10.0f, 10.0f, -10.0f, -10.0f, -10.0f, -10.0f};
+        float sphereLocations[9] = {0.0f, 0.0f, -10.0f, 10.0f, 10.0f, -10.0f, -10.0f, -10.0f, -10.0f};
+        std::cout << sphereLocations << std::endl;
         GLint u_SphereLocationsLocation = glGetUniformLocation(graphicsPipelineShaders, "u_SphereLocations");
         glUniform3fv(u_SphereLocationsLocation, 3, sphereLocations);
 
-        float sphereRadii[3] = {3.0f, 3.0f, 3.0f};
+        float sphereRadii[3] = {1.0f, 1.0f, 1.0f};
         GLint u_SphereRadiiLocation = glGetUniformLocation(graphicsPipelineShaders, "u_SphereRadii");
         glUniform1fv(u_SphereRadiiLocation, 3, sphereRadii);
 

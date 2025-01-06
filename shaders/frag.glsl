@@ -35,38 +35,35 @@ uint rand(uint seed) {
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html
 rayIntersect intersectSphere(Ray ray, vec3 sphereLocation, float sphereRadius) {
     rayIntersect intersect;
-    vec3 L = sphereLocation - ray.origin;
-    float tca = dot(L, ray.direction);
-    if (tca < 0) {
-        intersect.exists = false;
-        return intersect;
-    }
-    float d2 = dot(L, L) - tca * tca;
-    if (d2 > sphereRadius * sphereRadius) {
-        intersect.exists = false;
-        return intersect;
-    }
-    float thc = sqrt(sphereRadius * sphereRadius - d2);
-    float t0 = tca - thc;
-    float t1 = tca + thc;
+    intersect.exists = false;
+    ray.direction = normalize(ray.direction);
+    float a = 1;
+    float b = 2 * dot(ray.origin, ray.direction);
+    float c = dot(ray.origin, ray.origin) * dot(ray.direction, ray.direction);
 
-    if (t0 > t1) {
-        float tmp = t0;
-        t0 = t1;
-        t1 = tmp;
-    }
-    if (t0 < 0) {
-        t0 = t1;
-        if (t0 < t1) {
-            intersect.exists = false;
+    float discriminant = b * b - 4 * a * c;
+
+    if (discriminant < 0) {
+        return intersect;
+    } else {
+        float solution1 = (-b + sqrt(discriminant)) / (2);
+        float solution2 = (-b - sqrt(discriminant)) / (2);
+        float solution;
+        if (solution1 < 0 && solution2 < 0) {
             return intersect;
+        } else if (solution1 < 0) {
+            solution = solution2;
+        } else if (solution2 < 0) {
+            solution = solution1;
+        } else {
+            float solution = min(solution1, solution2);
         }
+        intersect.exists = true;
+        intersect.dst = solution;
+        intersect.pos = intersect.dst * ray.direction + ray.origin;
+        intersect.normal = normalize(intersect.pos - sphereLocation);
+        return intersect;
     }
-    intersect.exists = true;
-    intersect.pos = ray.origin + t0 * ray.direction;
-    intersect.normal = intersect.pos - sphereLocation;
-    intersect.dst = t0;
-    return intersect;
 }
 
 void main() {
