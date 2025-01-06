@@ -32,14 +32,8 @@ uint rand(uint seed) {
     return seed;
 }
 
-vec3 normalise(vec3 input) {
-    float invLength = 1/sqrt(input.x * input.x + input.y * input.y + input.z * input.z);
-
-    return {input.x * invLength, input.y * invLength, input.z * invLength};
-}
-
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html
-rayIntersect intersectSphere(Ray ray, float sphereLocation, float sphereRadius) {
+rayIntersect intersectSphere(Ray ray, vec3 sphereLocation, float sphereRadius) {
     rayIntersect intersect;
     vec3 L = sphereLocation - ray.origin;
     float tca = dot(L, ray.direction);
@@ -68,39 +62,35 @@ rayIntersect intersectSphere(Ray ray, float sphereLocation, float sphereRadius) 
             return intersect;
         }
     }
-    intersect.pos = ray.origin + t0 * ray.origin;
+    intersect.exists = true;
+    intersect.pos = ray.origin + t0 * ray.direction;
     intersect.normal = intersect.pos - sphereLocation;
     intersect.dst = t0;
     return intersect;
 }
 
 void main() {
-    uint randseed = uint(gl_FragCoord.x * gl_FragCoord.y * u_RandSeed);
+    // uint randseed = gl_FragCoord.x * gl_FragCoord.y * u_RandSeed;
     
     Ray ray;
     ray.direction = {(2/1280) * gl_FragCoord.x - 1, (2*0.5625/720) * gl_FragCoord.y - 0.5625, -1};
+    ray.direction = normalize(ray.direction);
     ray.origin = {0.0f, 0.0f, 0.0f};
 
-    for (int rayBounceCount = 0; rayBounceCount < 5; rayBounceCount++) {
+    float minIntersectDistance = 1000;
+    float intersectedSphereIndex = -1;
 
-
-        float minIntersectDistance = -1;
-        float intersectedSphereIndex = -1;
-
-        for (int i = 0; i < 3; i++) {
-            rayIntersect currentIntersect = intersect(ray, u_SphereLocations[i], u_SphereRadii[i]);
-            if ((minIntersectDistance == -1 && currentIntersect.exists) || (currentIntersect.exists && currentIntersect.dst < minIntersectDistance)) {
-                minIntersectDistance = currentIntersect;
-                intersectedSphereIndex = i;
-            }
-
-        }
-
-        if (minIntersectDistance > 0) {
-            color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-        } else {
-            color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    for (int i = 0; i < 3; i++) {
+        rayIntersect currentIntersect = intersectSphere(ray, u_SphereLocations[i], u_SphereRadii[i]);
+        if (currentIntersect.exists && currentIntersect.dst < minIntersectDistance) {
+            minIntersectDistance = currentIntersect.dst;
+            intersectedSphereIndex = i;
         }
     }
-    color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+
+    if (intersectedSphereIndex != -1) {
+        color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    } else {
+        color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    }
 }
