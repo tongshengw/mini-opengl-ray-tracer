@@ -5,6 +5,7 @@
 #include "glad/glad.h"
 #include <SDL2/SDL.h>
 #include <fstream>
+#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -96,6 +97,18 @@ class Scene {
 
 
 
+void GLAPIENTRY MessageCallback( GLenum source,
+                                GLenum type,
+                                GLuint id,
+                                GLenum severity,
+                                GLsizei length,
+                                const GLchar* message,
+                                const void* userParam )
+{
+    fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+            ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
+            type, severity, message );
+}
 
 class Screen {
 public:
@@ -136,6 +149,9 @@ public:
             throw LoadGladError{};
         }
 
+        glEnable(GL_DEBUG_OUTPUT);
+        glDebugMessageCallback(MessageCallback, 0);
+
         printOpenGLInfo();
 
         VertexSpecification();
@@ -166,6 +182,20 @@ public:
 
         GLint u_LightPosLocation = glGetUniformLocation(graphicsPipelineShaders, "u_LightPos");
         glUniform3f(u_LightPosLocation, 0.0f, 0.0f, 20.0f);
+
+        GLint u_LightRadiusLocation = glGetUniformLocation(graphicsPipelineShaders, "u_LightRadius");
+        glUniform1f(u_LightRadiusLocation, 0.1f);
+
+        float sphereLocations[9] = {0.0f, 0.0f, -5.0f, 10.0f, 10.0f, -10.0f, -10.0f, -10.0f, -10.0f};
+        GLint u_SphereLocationsLocation = glGetUniformLocation(graphicsPipelineShaders, "u_SphereLocations");
+        glUniform3fv(u_SphereLocationsLocation, 3, sphereLocations);
+
+        float sphereRadii[3] = {3.0f, 3.0f, 3.0f};
+        GLint u_SphereRadiiLocation = glGetUniformLocation(graphicsPipelineShaders, "u_SphereRadii");
+        glUniform1fv(u_SphereRadiiLocation, 3, sphereRadii);
+
+        GLint u_RandSeedLocation = glGetUniformLocation(graphicsPipelineShaders, "u_RandSeed");
+        glUniform1i(u_RandSeedLocation, (int) rand() * 100);
     }
     
     void Draw() {
@@ -193,7 +223,7 @@ private:
     GLuint vertexBufferObject = 0;
     GLuint graphicsPipelineShaders = 0;
 
-    
+
     void VertexSpecification() {
         glGenVertexArrays(1, &vertexArrayObject);
         glBindVertexArray(vertexArrayObject);

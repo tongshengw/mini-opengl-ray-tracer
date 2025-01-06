@@ -1,9 +1,9 @@
 CompileFlags:
   Add: [
-    "-IC:\\Users\\tongs\\Documents\\code\\gravity-sim\\SDL2\\x86_64-w64-mingw32\\include",
-    "-LC:\\Users\\tongs\\Documents\\code\\gravity-sim\\SDL2\\x86_64-w64-mingw32\\lib",
+    "-IC:\\Users\\tongs\\Documents\\code\\raytracer\\SDL2\\x86_64-w64-mingw32\\include",
+    "-LC:\\Users\\tongs\\Documents\\code\\raytracer\\SDL2\\x86_64-w64-mingw32\\lib",
     "-IC:\\mingw64\\include",
-    "-IC:\\Users\\tongs\\Documents\\code\\gravity-sim\\glad\\include",
+    "-IC:\\Users\\tongs\\Documents\\code\\raytracer\\glad\\include",
     "-lmingw32",
     "-lSDL2main",
     "-lSDL2",
