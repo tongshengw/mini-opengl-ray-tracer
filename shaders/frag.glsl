@@ -70,18 +70,15 @@ void main() {
     // uint randseed = gl_FragCoord.x * gl_FragCoord.y * u_RandSeed;
     
     Ray ray;
-    ray.direction = vec3((2/1280) * gl_FragCoord.x - 1, (2*0.5625/720) * gl_FragCoord.y - 0.5625, -1);
+    ray.direction = vec3((2.0/1280) * gl_FragCoord.x - 1, (2*0.5625/720) * gl_FragCoord.y - 0.5625, -1);
     ray.direction = normalize(ray.direction);
     ray.origin = vec3(0.0f, 0.0f, 0.0f);
 
-    vec3 sphereLocationTest = vec3(0.0f, 0.0f, -5.0f);
-    float sphereRadiusTest = 1.0f;
-
-    rayIntersect currentIntersect = intersectSphere(ray, sphereLocationTest, sphereRadiusTest);
+    rayIntersect currentIntersect = intersectSphere(ray, u_SphereLocations[0], u_SphereRadii[0]);
 
     if (currentIntersect.exists) {
         color = vec4(1.0f, 1.0f, 0.0f, 1.0f);
     } else {
-        color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+        color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     }
 }

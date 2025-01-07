@@ -167,13 +167,12 @@ public:
 
         glUseProgram(graphicsPipelineShaders);
 
-        m44<float> CameraMatrix = camera.perspectiveMatrix() * camera.viewMatrix();
-        GLint u_CameraMatrixLocation = glGetUniformLocation(graphicsPipelineShaders, "u_CameraMatrix");
-        glUniformMatrix4fv(u_CameraMatrixLocation, 1, GL_TRUE, CameraMatrix.data.data());
+        GLint u_PerspectiveMatrixLocation = glGetUniformLocation(graphicsPipelineShaders, "u_PerspectiveMatrix");
+        glUniformMatrix4fv(u_PerspectiveMatrixLocation, 1, GL_TRUE, camera.perspectiveMatrix().data.data());
 
-        m44<float> ModelMatrix;
-        GLint u_ModelMatrixLocation = glGetUniformLocation(graphicsPipelineShaders, "u_ModelMatrix");
-        glUniformMatrix4fv(u_ModelMatrixLocation, 1, GL_TRUE, ModelMatrix.data.data());
+        // m44<float> ModelMatrix;
+        // GLint u_ModelMatrixLocation = glGetUniformLocation(graphicsPipelineShaders, "u_ModelMatrix");
+        // glUniformMatrix4fv(u_ModelMatrixLocation, 1, GL_TRUE, ModelMatrix.data.data());
 
         GLint u_CameraPosLocation = glGetUniformLocation(graphicsPipelineShaders, "u_CameraPos");
         glUniform3f(u_CameraPosLocation, camera.get_pos().x, camera.get_pos().y, camera.get_pos().z);
@@ -187,9 +186,20 @@ public:
         GLint u_LightRadiusLocation = glGetUniformLocation(graphicsPipelineShaders, "u_LightRadius");
         glUniform1f(u_LightRadiusLocation, 0.1f);
 
-        float sphereLocations[9] = {0.0f, 0.0f, -10.0f, 10.0f, 10.0f, -10.0f, -10.0f, -10.0f, -10.0f};
+        std::array<v4<float>, 3> worldCoordSpheres;
+        worldCoordSpheres[0] = {0, 0, -10, 1};
+        worldCoordSpheres[1] = {50, 0, 0, 1};
+        worldCoordSpheres[2] = {50, 0, 0, 1};
+
+        std::vector<float> sphereLocations;
+        for (v4<float> worldCoordSphere : worldCoordSpheres) {
+            v4<float> cameraCoordSphere = camera.viewMatrix() * worldCoordSphere;
+            sphereLocations.push_back(cameraCoordSphere.x);
+            sphereLocations.push_back(cameraCoordSphere.y);
+            sphereLocations.push_back(cameraCoordSphere.z);
+        }
         GLint u_SphereLocationsLocation = glGetUniformLocation(graphicsPipelineShaders, "u_SphereLocations");
-        glUniform3fv(u_SphereLocationsLocation, 3, &sphereLocations[0]);
+        glUniform3fv(u_SphereLocationsLocation, 3, sphereLocations.data());
 
         float sphereRadii[3] = {1.0f, 1.0f, 1.0f};
         GLint u_SphereRadiiLocation = glGetUniformLocation(graphicsPipelineShaders, "u_SphereRadii");
