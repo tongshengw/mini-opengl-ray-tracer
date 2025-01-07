@@ -162,7 +162,7 @@ public:
     void PreDraw() {
         glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-        glClearColor(1.0f, 0.0f, 0.0f, 1.f);
+        glClearColor(0.0f, 0.0f, 1.0f, 1.f);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
         glUseProgram(graphicsPipelineShaders);
