@@ -162,8 +162,9 @@ public:
     void PreDraw() {
         glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-        glClearColor(0.6f, 0.6f, 0.6f, 1.f);
+        glClearColor(1.0f, 0.0f, 0.0f, 1.f);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
         glUseProgram(graphicsPipelineShaders);
 
         m44<float> CameraMatrix = camera.perspectiveMatrix() * camera.viewMatrix();
@@ -187,9 +188,8 @@ public:
         glUniform1f(u_LightRadiusLocation, 0.1f);
 
         float sphereLocations[9] = {0.0f, 0.0f, -10.0f, 10.0f, 10.0f, -10.0f, -10.0f, -10.0f, -10.0f};
-        std::cout << sphereLocations << std::endl;
         GLint u_SphereLocationsLocation = glGetUniformLocation(graphicsPipelineShaders, "u_SphereLocations");
-        glUniform3fv(u_SphereLocationsLocation, 3, sphereLocations);
+        glUniform3fv(u_SphereLocationsLocation, 3, &sphereLocations[0]);
 
         float sphereRadii[3] = {1.0f, 1.0f, 1.0f};
         GLint u_SphereRadiiLocation = glGetUniformLocation(graphicsPipelineShaders, "u_SphereRadii");

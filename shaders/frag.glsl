@@ -38,8 +38,8 @@ rayIntersect intersectSphere(Ray ray, vec3 sphereLocation, float sphereRadius) {
     intersect.exists = false;
     ray.direction = normalize(ray.direction);
     float a = 1;
-    float b = 2 * dot(ray.origin, ray.direction);
-    float c = dot(ray.origin, ray.origin) * dot(ray.direction, ray.direction);
+    float b = 2 * dot(ray.origin-sphereLocation, ray.direction);
+    float c = dot(ray.origin-sphereLocation, ray.origin-sphereLocation) - sphereRadius * sphereRadius;
 
     float discriminant = b * b - 4 * a * c;
 
@@ -74,19 +74,13 @@ void main() {
     ray.direction = normalize(ray.direction);
     ray.origin = vec3(0.0f, 0.0f, 0.0f);
 
-    float minIntersectDistance = 1000;
-    float intersectedSphereIndex = -1;
+    vec3 sphereLocationTest = vec3(0.0f, 0.0f, -5.0f);
+    float sphereRadiusTest = 1.0f;
 
-    for (int i = 0; i < 3; i++) {
-        rayIntersect currentIntersect = intersectSphere(ray, u_SphereLocations[i], u_SphereRadii[i]);
-        if (currentIntersect.exists && currentIntersect.dst < minIntersectDistance) {
-            minIntersectDistance = currentIntersect.dst;
-            intersectedSphereIndex = i;
-        }
-    }
+    rayIntersect currentIntersect = intersectSphere(ray, sphereLocationTest, sphereRadiusTest);
 
-    if (intersectedSphereIndex != -1) {
-        color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    if (currentIntersect.exists) {
+        color = vec4(1.0f, 1.0f, 0.0f, 1.0f);
     } else {
         color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
     }
