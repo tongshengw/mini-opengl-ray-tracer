@@ -66,6 +66,23 @@ rayIntersect intersectSphere(Ray ray, vec3 sphereLocation, float sphereRadius) {
     }
 }
 
+rayIntersect findClosestIntersect(Ray ray) {
+    float minIntersectDistance = 1000;
+    int closestSphereIndex = -1;
+    rayIntersect minIntersect;
+    minIntersect.exists = false;
+
+    for (int i = 0; i < 3; i++) {
+        rayIntersect currentIntersect = intersectSphere(ray, u_SphereLocations[i], u_SphereRadii[i]);
+        if (currentIntersect.exists && currentIntersect.dst < minIntersectDistance) {
+            closestSphereIndex = i;
+            minIntersectDistance = currentIntersect.dst;
+            minIntersect = currentIntersect;
+        }
+    }
+    return minIntersect;
+}
+
 void main() {
     // uint randseed = gl_FragCoord.x * gl_FragCoord.y * u_RandSeed;
     
@@ -74,10 +91,14 @@ void main() {
     ray.direction = normalize(ray.direction);
     ray.origin = vec3(0.0f, 0.0f, 0.0f);
 
-    rayIntersect currentIntersect = intersectSphere(ray, u_SphereLocations[0], u_SphereRadii[0]);
+    rayIntersect currentIntersect = findClosestIntersect(ray);
 
-    if (currentIntersect.exists) {
+    if (closestSphereIndex == 0) {
         color = vec4(1.0f, 1.0f, 0.0f, 1.0f);
+    } else if (closestSphereIndex == 1) {
+        color = vec4(1.0f, 0.5f, 0.0f, 1.0f);
+    } else if (closestSphereIndex == 2) {
+        color = vec4(1.0f, 0.2f, 0.0f, 1.0f);
     } else {
         color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     }

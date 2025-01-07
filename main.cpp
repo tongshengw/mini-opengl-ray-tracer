@@ -188,8 +188,8 @@ public:
 
         std::array<v4<float>, 3> worldCoordSpheres;
         worldCoordSpheres[0] = {0, 0, -10, 1};
-        worldCoordSpheres[1] = {50, 0, 0, 1};
-        worldCoordSpheres[2] = {50, 0, 0, 1};
+        worldCoordSpheres[1] = {10, 0, -10, 1};
+        worldCoordSpheres[2] = {-5, 0, -20, 1};
 
         std::vector<float> sphereLocations;
         for (v4<float> worldCoordSphere : worldCoordSpheres) {
