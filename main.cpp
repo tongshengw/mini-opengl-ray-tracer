@@ -118,6 +118,11 @@ public:
 
     std::vector<SDL_FPoint> points;
 
+    typedef struct Sphere {
+        v3<float> location;
+
+    } Sphere; 
+
 public:
     Screen(const std::string &vertexShaderIn, const std::string &fragmentShaderIn) {
         SDL_Init(SDL_INIT_EVERYTHING);

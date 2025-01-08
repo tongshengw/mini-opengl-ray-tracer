@@ -3,23 +3,28 @@
 in vec4 gl_FragCoord;
 out vec4 color;
 
+struct Sphere {
+    vec3 location;
+    float radius;
+    vec3 color;
+};
+
 uniform vec3 u_CameraPos;
 uniform vec3 u_CameraDir;
-uniform vec3 u_SphereLocations[3];
-uniform float u_SphereRadii[3];
+uniform Sphere u_Spheres[3];
 uniform int u_RandSeed;
 
-struct rayInfo {
+struct RayInfo {
     vec3 color;
 };
 
 struct Ray {
     vec3 direction;
     vec3 origin;
-    rayInfo info;
+    RayInfo info;
 };
 
-struct rayIntersect {
+struct RayIntersect {
     bool exists;
     float dst;
     vec3 pos;
@@ -36,8 +41,8 @@ uint rand(uint seed) {
 }
 
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html
-rayIntersect intersectSphere(Ray ray, vec3 sphereLocation, float sphereRadius) {
-    rayIntersect intersect;
+RayIntersect intersectSphere(Ray ray, vec3 sphereLocation, float sphereRadius) {
+    RayIntersect intersect;
     intersect.exists = false;
     ray.direction = normalize(ray.direction);
     float a = 1;
