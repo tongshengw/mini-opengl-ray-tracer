@@ -68,7 +68,7 @@ RayIntersect intersectSphere(Ray ray, Sphere sphere) {
         intersect.pos = intersect.dst * ray.direction + ray.origin;
         intersect.normal = normalize(intersect.pos - sphere.location);
         intersect.new_ray = ray;
-        intersect.new_ray.color = ray.color + sphere.color;
+        intersect.new_ray.color = ray.color * sphere.color;
         return intersect;
     }
 }
@@ -97,9 +97,13 @@ void main() {
     ray.direction = vec3((2.0/1280) * gl_FragCoord.x - 1, (2*0.5625/720) * gl_FragCoord.y - 0.5625, -1);
     ray.direction = normalize(ray.direction);
     ray.origin = vec3(0.0f, 0.0f, 0.0f);
-    ray.color = vec3(0.0f, 0.0f, 0.0f);
+    ray.color = vec3(1.0f, 1.0f, 1.0f);
 
     rayIntersect currentIntersect = findClosestIntersect(ray);
 
-    color = vec4(currentIntersect.new_ray.color.x, currentIntersect.new_ray.color.y, currentIntersect.new_ray.color.z, 1.0f);
+    if (currentIntersect.exists) {
+        color = vec4(currentIntersect.new_ray.color.x, currentIntersect.new_ray.color.y, currentIntersect.new_ray.color.z, 1.0f);
+    } else {
+        color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    }
 }
