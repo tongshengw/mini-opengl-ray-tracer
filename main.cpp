@@ -7,6 +7,7 @@
 #include <fstream>
 #include <cmath>
 #include <iostream>
+#include <ratio>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -122,6 +123,7 @@ public:
         v3<float> location;
         float radius;
         v3<float> color;
+        float emmission;
     } Sphere; 
 
 public:
@@ -188,27 +190,34 @@ public:
         sphereColors[2] = {0, 1, 1};
 
         std::array<float, 3> sphereRadii{1, 1, 1};
+        std::array<float, 3> sphereEmmission{1, 0, 0};
 
         for (int i = 0; i < 3; i++) {
             v4<float> cameraCoordSphere = camera.viewMatrix() * worldCoordSpheres[i];
-            spheres.push_back({{cameraCoordSphere}, sphereRadii[i], {sphereColors[i]}});
+            spheres.push_back({{cameraCoordSphere}, sphereRadii[i], {sphereColors[i]}, sphereEmmission[i]});
         }
 
         for (int i = 0; i < 3; i++) {
             std::string locationStr =  "u_Spheres[" + std::to_string(i) + "].location";
             std::string radiusStr =  "u_Spheres[" + std::to_string(i) + "].radius";
             std::string colorStr =  "u_Spheres[" + std::to_string(i) + "].color";
+            std::string emmissionStr = "u_Spheres[" + std::to_string(i) + "].emmission";
+
             GLint u_SpheresiLocationLocation = glGetUniformLocation(graphicsPipelineShaders, locationStr.c_str());
             GLint u_SpheresiRadiusLocation = glGetUniformLocation(graphicsPipelineShaders, radiusStr.c_str());
             GLint u_SpheresiColorLocation = glGetUniformLocation(graphicsPipelineShaders, colorStr.c_str());
+            GLint u_SpheresiEmmissionLocation = glGetUniformLocation(graphicsPipelineShaders, emmissionStr.c_str());
 
             glUniform3f(u_SpheresiLocationLocation, spheres[i].location.x, spheres[i].location.y, spheres[i].location.z);
             glUniform1f(u_SpheresiRadiusLocation, spheres[i].radius);
             glUniform3f(u_SpheresiColorLocation, spheres[i].color.x, spheres[i].color.y, spheres[i].color.z);
+            glUniform1f(u_SpheresiEmmissionLocation, spheres[i].emmission);
         }
 
         GLint u_RandSeedLocation = glGetUniformLocation(graphicsPipelineShaders, "u_RandSeed");
-        glUniform1i(u_RandSeedLocation, rand() * 10000);
+        int RandSeed = rand() * 100;
+        std::cout << RandSeed << std::endl;
+        glUniform1i(u_RandSeedLocation, RandSeed);
     }
     
     void Draw() {

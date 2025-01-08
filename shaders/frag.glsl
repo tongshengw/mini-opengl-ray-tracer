@@ -7,6 +7,7 @@ struct Sphere {
     vec3 location;
     float radius;
     vec3 color;
+    float emmission;
 };
 
 // uniform vec3 u_CameraPos;
@@ -91,7 +92,7 @@ RayIntersect findClosestIntersect(Ray ray) {
 }
 
 void main() {
-    // uint randseed = gl_FragCoord.x * gl_FragCoord.y * u_RandSeed;
+    int indexSeed = (gl_FragCoord.x*1280 + gl_FragCoord.y) * u_RandSeed;
     
     Ray ray;
     ray.direction = vec3((2.0/1280) * gl_FragCoord.x - 1, (2*0.5625/720) * gl_FragCoord.y - 0.5625, -1);
