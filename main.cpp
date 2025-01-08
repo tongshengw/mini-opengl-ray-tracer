@@ -185,17 +185,20 @@ public:
             v4<float> cameraCoordSphere = camera.viewMatrix() * worldCoordSphere;
             spheres.push_back({{cameraCoordSphere}, 1.0f, {0.5f, 0.5f, 0.0f}});
         }
+        for (Sphere s : spheres) {
+            std::cout << s.location << s.radius << s.color << std::endl;
+        }
         for (int i = 0; i < 3; i++) {
             std::string locationStr =  "u_Spheres[" + std::to_string(i) + "].location";
             std::string radiusStr =  "u_Spheres[" + std::to_string(i) + "].radius";
             std::string colorStr =  "u_Spheres[" + std::to_string(i) + "].color";
             GLint u_SpheresiLocationLocation = glGetUniformLocation(graphicsPipelineShaders, locationStr.c_str());
             GLint u_SpheresiRadiusLocation = glGetUniformLocation(graphicsPipelineShaders, radiusStr.c_str());
-            GLint u_SpheresiColorLocatoin = glGetUniformLocation(graphicsPipelineShaders, colorStr.c_str());
+            GLint u_SpheresiColorLocation = glGetUniformLocation(graphicsPipelineShaders, colorStr.c_str());
 
             glUniform3f(u_SpheresiLocationLocation, spheres[i].location.x, spheres[i].location.y, spheres[i].location.z);
             glUniform1f(u_SpheresiRadiusLocation, spheres[i].radius);
-            glUniform3f(u_SpheresiColorLocatoin, spheres[i].color.x, spheres[i].color.y, spheres[i].color.z);
+            glUniform3f(u_SpheresiColorLocation, spheres[i].color.x, spheres[i].color.y, spheres[i].color.z);
         }
 
         GLint u_RandSeedLocation = glGetUniformLocation(graphicsPipelineShaders, "u_RandSeed");

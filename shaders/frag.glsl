@@ -39,15 +39,12 @@ uint rand(uint seed) {
 
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html
 RayIntersect intersectSphere(Ray ray, Sphere sphere) {
-    vec3 sphereLocation = sphere.location;
-    float sphereRadius = sphere.radius;
-
     RayIntersect intersect;
     intersect.exists = false;
     ray.direction = normalize(ray.direction);
     float a = 1;
-    float b = 2 * dot(ray.origin-sphereLocation, ray.direction);
-    float c = dot(ray.origin-sphereLocation, ray.origin-sphereLocation) - sphereRadius * sphereRadius;
+    float b = 2 * dot(ray.origin-sphere.location, ray.direction);
+    float c = dot(ray.origin-sphere.location, ray.origin-sphere.location) - sphere.radius * sphere.radius;
 
     float discriminant = b * b - 4 * a * c;
 
@@ -69,7 +66,7 @@ RayIntersect intersectSphere(Ray ray, Sphere sphere) {
         intersect.exists = true;
         intersect.dst = solution;
         intersect.pos = intersect.dst * ray.direction + ray.origin;
-        intersect.normal = normalize(intersect.pos - sphereLocation);
+        intersect.normal = normalize(intersect.pos - sphere.location);
         intersect.new_ray = ray;
         intersect.new_ray.color = ray.color + sphere.color;
         return intersect;
@@ -100,8 +97,9 @@ void main() {
     ray.direction = vec3((2.0/1280) * gl_FragCoord.x - 1, (2*0.5625/720) * gl_FragCoord.y - 0.5625, -1);
     ray.direction = normalize(ray.direction);
     ray.origin = vec3(0.0f, 0.0f, 0.0f);
+    ray.color = vec3(0.0f, 0.0f, 0.0f);
 
     rayIntersect currentIntersect = findClosestIntersect(ray);
 
-    color = currentIntersect.new_ray.color;
+    color = vec4(currentIntersect.new_ray.color.x, currentIntersect.new_ray.color.y, currentIntersect.new_ray.color.z, 1.0f);
 }
