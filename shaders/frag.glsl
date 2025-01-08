@@ -9,19 +9,15 @@ struct Sphere {
     vec3 color;
 };
 
-uniform vec3 u_CameraPos;
-uniform vec3 u_CameraDir;
+// uniform vec3 u_CameraPos;
+// uniform vec3 u_CameraDir;
 uniform Sphere u_Spheres[3];
 uniform int u_RandSeed;
-
-struct RayInfo {
-    vec3 color;
-};
 
 struct Ray {
     vec3 direction;
     vec3 origin;
-    RayInfo info;
+    vec3 color;
 };
 
 struct RayIntersect {
@@ -29,6 +25,7 @@ struct RayIntersect {
     float dst;
     vec3 pos;
     vec3 normal;
+    Ray new_ray;
 };
 
 uint rand(uint seed) {
@@ -41,7 +38,10 @@ uint rand(uint seed) {
 }
 
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html
-RayIntersect intersectSphere(Ray ray, vec3 sphereLocation, float sphereRadius) {
+RayIntersect intersectSphere(Ray ray, Sphere sphere) {
+    vec3 sphereLocation = sphere.location;
+    float sphereRadius = sphere.radius;
+
     RayIntersect intersect;
     intersect.exists = false;
     ray.direction = normalize(ray.direction);
@@ -70,6 +70,8 @@ RayIntersect intersectSphere(Ray ray, vec3 sphereLocation, float sphereRadius) {
         intersect.dst = solution;
         intersect.pos = intersect.dst * ray.direction + ray.origin;
         intersect.normal = normalize(intersect.pos - sphereLocation);
+        intersect.new_ray = ray;
+        intersect.new_ray.color = ray.color + sphere.color;
         return intersect;
     }
 }
@@ -81,7 +83,7 @@ rayIntersect findClosestIntersect(Ray ray) {
     minIntersect.exists = false;
 
     for (int i = 0; i < 3; i++) {
-        rayIntersect currentIntersect = intersectSphere(ray, u_SphereLocations[i], u_SphereRadii[i]);
+        rayIntersect currentIntersect = intersectSphere(ray, u_Spheres[i]);
         if (currentIntersect.exists && currentIntersect.dst < minIntersectDistance) {
             closestSphereIndex = i;
             minIntersectDistance = currentIntersect.dst;
@@ -101,13 +103,5 @@ void main() {
 
     rayIntersect currentIntersect = findClosestIntersect(ray);
 
-    if (closestSphereIndex == 0) {
-        color = vec4(1.0f, 1.0f, 0.0f, 1.0f);
-    } else if (closestSphereIndex == 1) {
-        color = vec4(1.0f, 0.5f, 0.0f, 1.0f);
-    } else if (closestSphereIndex == 2) {
-        color = vec4(1.0f, 0.2f, 0.0f, 1.0f);
-    } else {
-        color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    }
+    color = currentIntersect.new_ray.color;
 }

@@ -120,7 +120,8 @@ public:
 
     typedef struct Sphere {
         v3<float> location;
-
+        float radius;
+        v3<float> color;
     } Sphere; 
 
 public:
@@ -175,34 +176,27 @@ public:
         GLint u_PerspectiveMatrixLocation = glGetUniformLocation(graphicsPipelineShaders, "u_PerspectiveMatrix");
         glUniformMatrix4fv(u_PerspectiveMatrixLocation, 1, GL_TRUE, camera.perspectiveMatrix().data.data());
 
-        // m44<float> ModelMatrix;
-        // GLint u_ModelMatrixLocation = glGetUniformLocation(graphicsPipelineShaders, "u_ModelMatrix");
-        // glUniformMatrix4fv(u_ModelMatrixLocation, 1, GL_TRUE, ModelMatrix.data.data());
-
-        GLint u_CameraPosLocation = glGetUniformLocation(graphicsPipelineShaders, "u_CameraPos");
-        glUniform3f(u_CameraPosLocation, camera.get_pos().x, camera.get_pos().y, camera.get_pos().z);
-
-        GLint u_CameraDirLocation = glGetUniformLocation(graphicsPipelineShaders, "u_CameraDir");
-        glUniform3f(u_CameraDirLocation, camera.get_dir().x, camera.get_dir().y, camera.get_dir().z);
-
+        std::vector<Sphere> spheres;
         std::array<v4<float>, 3> worldCoordSpheres;
         worldCoordSpheres[0] = {0, 0, -10, 1};
         worldCoordSpheres[1] = {10, 0, -10, 1};
         worldCoordSpheres[2] = {-5, 0, -20, 1};
-
-        std::vector<float> sphereLocations;
         for (v4<float> worldCoordSphere : worldCoordSpheres) {
             v4<float> cameraCoordSphere = camera.viewMatrix() * worldCoordSphere;
-            sphereLocations.push_back(cameraCoordSphere.x);
-            sphereLocations.push_back(cameraCoordSphere.y);
-            sphereLocations.push_back(cameraCoordSphere.z);
+            spheres.push_back({{cameraCoordSphere}, 1.0f, {0.5f, 0.5f, 0.0f}});
         }
-        GLint u_SphereLocationsLocation = glGetUniformLocation(graphicsPipelineShaders, "u_SphereLocations");
-        glUniform3fv(u_SphereLocationsLocation, 3, sphereLocations.data());
+        for (int i = 0; i < 3; i++) {
+            std::string locationStr =  "u_Spheres[" + std::to_string(i) + "].location";
+            std::string radiusStr =  "u_Spheres[" + std::to_string(i) + "].radius";
+            std::string colorStr =  "u_Spheres[" + std::to_string(i) + "].color";
+            GLint u_SpheresiLocationLocation = glGetUniformLocation(graphicsPipelineShaders, locationStr.c_str());
+            GLint u_SpheresiRadiusLocation = glGetUniformLocation(graphicsPipelineShaders, radiusStr.c_str());
+            GLint u_SpheresiColorLocatoin = glGetUniformLocation(graphicsPipelineShaders, colorStr.c_str());
 
-        float sphereRadii[3] = {1.0f, 1.0f, 1.0f};
-        GLint u_SphereRadiiLocation = glGetUniformLocation(graphicsPipelineShaders, "u_SphereRadii");
-        glUniform1fv(u_SphereRadiiLocation, 3, sphereRadii);
+            glUniform3f(u_SpheresiLocationLocation, spheres[i].location.x, spheres[i].location.y, spheres[i].location.z);
+            glUniform1f(u_SpheresiRadiusLocation, spheres[i].radius);
+            glUniform3f(u_SpheresiColorLocatoin, spheres[i].color.x, spheres[i].color.y, spheres[i].color.z);
+        }
 
         GLint u_RandSeedLocation = glGetUniformLocation(graphicsPipelineShaders, "u_RandSeed");
         glUniform1i(u_RandSeedLocation, (int) rand() * 100);
