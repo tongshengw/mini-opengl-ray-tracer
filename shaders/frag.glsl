@@ -5,15 +5,18 @@ out vec4 color;
 
 uniform vec3 u_CameraPos;
 uniform vec3 u_CameraDir;
-uniform vec3 u_LightPos;
-uniform float u_LightRadius;
 uniform vec3 u_SphereLocations[3];
 uniform float u_SphereRadii[3];
 uniform int u_RandSeed;
 
+struct rayInfo {
+    vec3 color;
+};
+
 struct Ray {
     vec3 direction;
     vec3 origin;
+    rayInfo info;
 };
 
 struct rayIntersect {

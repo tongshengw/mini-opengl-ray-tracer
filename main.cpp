@@ -180,12 +180,6 @@ public:
         GLint u_CameraDirLocation = glGetUniformLocation(graphicsPipelineShaders, "u_CameraDir");
         glUniform3f(u_CameraDirLocation, camera.get_dir().x, camera.get_dir().y, camera.get_dir().z);
 
-        GLint u_LightPosLocation = glGetUniformLocation(graphicsPipelineShaders, "u_LightPos");
-        glUniform3f(u_LightPosLocation, 0.0f, 0.0f, 20.0f);
-
-        GLint u_LightRadiusLocation = glGetUniformLocation(graphicsPipelineShaders, "u_LightRadius");
-        glUniform1f(u_LightRadiusLocation, 0.1f);
-
         std::array<v4<float>, 3> worldCoordSpheres;
         worldCoordSpheres[0] = {0, 0, -10, 1};
         worldCoordSpheres[1] = {10, 0, -10, 1};
