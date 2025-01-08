@@ -73,14 +73,14 @@ RayIntersect intersectSphere(Ray ray, Sphere sphere) {
     }
 }
 
-rayIntersect findClosestIntersect(Ray ray) {
+RayIntersect findClosestIntersect(Ray ray) {
     float minIntersectDistance = 1000;
     int closestSphereIndex = -1;
-    rayIntersect minIntersect;
+    RayIntersect minIntersect;
     minIntersect.exists = false;
 
     for (int i = 0; i < 3; i++) {
-        rayIntersect currentIntersect = intersectSphere(ray, u_Spheres[i]);
+        RayIntersect currentIntersect = intersectSphere(ray, u_Spheres[i]);
         if (currentIntersect.exists && currentIntersect.dst < minIntersectDistance) {
             closestSphereIndex = i;
             minIntersectDistance = currentIntersect.dst;
@@ -99,7 +99,7 @@ void main() {
     ray.origin = vec3(0.0f, 0.0f, 0.0f);
     ray.color = vec3(1.0f, 1.0f, 1.0f);
 
-    rayIntersect currentIntersect = findClosestIntersect(ray);
+    RayIntersect currentIntersect = findClosestIntersect(ray);
 
     if (currentIntersect.exists) {
         color = vec4(currentIntersect.new_ray.color.x, currentIntersect.new_ray.color.y, currentIntersect.new_ray.color.z, 1.0f);

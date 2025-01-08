@@ -181,13 +181,19 @@ public:
         worldCoordSpheres[0] = {0, 0, -10, 1};
         worldCoordSpheres[1] = {10, 0, -10, 1};
         worldCoordSpheres[2] = {-5, 0, -20, 1};
-        for (v4<float> worldCoordSphere : worldCoordSpheres) {
-            v4<float> cameraCoordSphere = camera.viewMatrix() * worldCoordSphere;
-            spheres.push_back({{cameraCoordSphere}, 1.0f, {0.5f, 0.5f, 0.0f}});
+
+        std::array<v3<float>, 3> sphereColors;
+        sphereColors[0] = {1, 0, 0};
+        sphereColors[1] = {0, 1, 0};
+        sphereColors[2] = {0, 1, 1};
+
+        std::array<float, 3> sphereRadii{1, 1, 1};
+
+        for (int i = 0; i < 3; i++) {
+            v4<float> cameraCoordSphere = camera.viewMatrix() * worldCoordSpheres[i];
+            spheres.push_back({{cameraCoordSphere}, sphereRadii[i], {sphereColors[i]}});
         }
-        for (Sphere s : spheres) {
-            std::cout << s.location << s.radius << s.color << std::endl;
-        }
+
         for (int i = 0; i < 3; i++) {
             std::string locationStr =  "u_Spheres[" + std::to_string(i) + "].location";
             std::string radiusStr =  "u_Spheres[" + std::to_string(i) + "].radius";
@@ -202,7 +208,7 @@ public:
         }
 
         GLint u_RandSeedLocation = glGetUniformLocation(graphicsPipelineShaders, "u_RandSeed");
-        glUniform1i(u_RandSeedLocation, (int) rand() * 100);
+        glUniform1i(u_RandSeedLocation, rand() * 10000);
     }
     
     void Draw() {
