@@ -65,7 +65,7 @@ vec3 randomDirection(uint randomSeed) {
 }
 
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html
-RayIntersect intersectSphere(Ray ray, Sphere sphere) {
+RayIntersect intersectSphere(Ray ray, Sphere sphere, uint randomSeed) {
     RayIntersect intersect;
     intersect.exists = false;
     ray.direction = normalize(ray.direction);
@@ -94,20 +94,26 @@ RayIntersect intersectSphere(Ray ray, Sphere sphere) {
         intersect.dst = solution;
         intersect.pos = intersect.dst * ray.direction + ray.origin;
         intersect.normal = normalize(intersect.pos - sphere.location);
-        intersect.new_ray = ray;
-        intersect.new_ray.color = ray.color * sphere.color;
+        intersect.new_ray.direction = randomDirection(randomSeed);
+        if (dot(intersect.new_ray.direction, intersect.normal) > 0.0) {
+            pass; 
+        } else {
+            intersect.new_ray.direction = -intersect.new_ray.direction;
+        }
+        intersect.new_ray.origin = pos;
+        intersect.new_ray.color = 0.5 * ray.color * sphere.color;
         return intersect;
     }
 }
 
-RayIntersect findClosestIntersect(Ray ray) {
+RayIntersect findClosestIntersect(Ray ray, uint randomSeed) {
     float minIntersectDistance = 1000;
     int closestSphereIndex = -1;
     RayIntersect minIntersect;
     minIntersect.exists = false;
 
     for (int i = 0; i < 3; i++) {
-        RayIntersect currentIntersect = intersectSphere(ray, u_Spheres[i]);
+        RayIntersect currentIntersect = intersectSphere(ray, u_Spheres[i], randomSeed);
         if (currentIntersect.exists && currentIntersect.dst < minIntersectDistance) {
             closestSphereIndex = i;
             minIntersectDistance = currentIntersect.dst;
@@ -128,7 +134,7 @@ void main() {
     ray.color = vec3(0.0f, 0.0f, 0.0f);
 
     for (int bounce = 0; bounce < 5; bounce++) {
-        RayIntersect currentIntersect = findClosestIntersect(ray);
+        RayIntersect currentIntersect = findClosestIntersect(ray, currentSeed);
         if (currentIntersect.exists) {
             ray = currentIntersect.new_ray;
         }
