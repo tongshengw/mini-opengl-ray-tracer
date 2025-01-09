@@ -95,13 +95,20 @@ RayIntersect intersectSphere(Ray ray, Sphere sphere, uint randomSeed) {
         intersect.pos = intersect.dst * ray.direction + ray.origin;
         intersect.normal = normalize(intersect.pos - sphere.location);
         intersect.new_ray.direction = randomDirection(randomSeed);
-        if (dot(intersect.new_ray.direction, intersect.normal) > 0.0) {
-            pass; 
-        } else {
+        if (dot(intersect.new_ray.direction, intersect.normal) < 0.0) {
             intersect.new_ray.direction = -intersect.new_ray.direction;
         }
-        intersect.new_ray.origin = pos;
-        intersect.new_ray.color = 0.5 * ray.color * sphere.color;
+        intersect.new_ray.origin = intersect.pos;
+        
+        // Set new ray properties
+        intersect.new_ray.brightness = ray.brightness * 0.5;  // Light falloff
+        intersect.new_ray.color = ray.color * sphere.color;   // Surface color interaction
+        
+        // Add emission contribution
+        if (sphere.emmission > 0.0) {
+            intersect.new_ray.color += sphere.color * sphere.emmission;
+        }
+        
         return intersect;
     }
 }
@@ -131,14 +138,17 @@ void main() {
     ray.direction = vec3((2.0/1280) * gl_FragCoord.x - 1, (2*0.5625/720) * gl_FragCoord.y - 0.5625, -1);
     ray.direction = normalize(ray.direction);
     ray.origin = vec3(0.0f, 0.0f, 0.0f);
-    ray.color = vec3(0.0f, 0.0f, 0.0f);
+    ray.color = vec3(0.0f, 0.0f, 0.0f);     // Start with black
+    ray.brightness = vec3(1.0f, 1.0f, 1.0f); // Start with full brightness
 
+    vec3 finalColor = vec3(0.0f);
     for (int bounce = 0; bounce < 5; bounce++) {
         RayIntersect currentIntersect = findClosestIntersect(ray, currentSeed);
         if (currentIntersect.exists) {
             ray = currentIntersect.new_ray;
+            finalColor += ray.color * ray.brightness;  // Accumulate color weighted by brightness
         }
     }
 
-    color = vec4(ray.color.x, ray.color.y, ray.color.z, 1.0f);
+    color = vec4(finalColor, 1.0f);
 }
