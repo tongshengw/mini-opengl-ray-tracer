@@ -13,12 +13,13 @@ struct Sphere {
 // uniform vec3 u_CameraPos;
 // uniform vec3 u_CameraDir;
 uniform Sphere u_Spheres[3];
-uniform int u_RandSeed;
+uniform uint u_RandSeed;
 
 struct Ray {
     vec3 direction;
     vec3 origin;
     vec3 color;
+    vec3 brightness;
 };
 
 struct RayIntersect {
@@ -29,13 +30,10 @@ struct RayIntersect {
     Ray new_ray;
 };
 
-uint rand(uint seed) {
-    seed = (seed ^ 61) ^ (seed >> 16);
-    seed *= 9;
-    seed = seed ^ (seed >> 4);
-    seed *= 0x27d4eb2d;
-    seed = seed ^ (seed >> 15);
-    return seed;
+uint TausStep(uint state) {
+    uint b = (((state << 1128064416) ^ state) >> 1918663207);
+    state = (((state & 1367233998) << 57905439) ^ b);
+    return state;
 }
 
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html
@@ -92,19 +90,22 @@ RayIntersect findClosestIntersect(Ray ray) {
 }
 
 void main() {
-    int indexSeed = (gl_FragCoord.x*1280 + gl_FragCoord.y) * u_RandSeed;
-    
-    Ray ray;
-    ray.direction = vec3((2.0/1280) * gl_FragCoord.x - 1, (2*0.5625/720) * gl_FragCoord.y - 0.5625, -1);
-    ray.direction = normalize(ray.direction);
-    ray.origin = vec3(0.0f, 0.0f, 0.0f);
-    ray.color = vec3(1.0f, 1.0f, 1.0f);
+    uint frameSeed = uint(gl_FragCoord.x * gl_FragCoord.y + gl_FragCoord.y);
+    for (int bounce = 0; bounce < 5; bounce++) {
 
-    RayIntersect currentIntersect = findClosestIntersect(ray);
+        uint indexSeed = frameSeed + u_RandSeed;
+        indexSeed = TausStep(indexSeed);
 
-    if (currentIntersect.exists) {
-        color = vec4(currentIntersect.new_ray.color.x, currentIntersect.new_ray.color.y, currentIntersect.new_ray.color.z, 1.0f);
-    } else {
-        color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        Ray ray;
+        ray.direction = vec3((2.0/1280) * gl_FragCoord.x - 1, (2*0.5625/720) * gl_FragCoord.y - 0.5625, -1);
+        ray.direction = normalize(ray.direction);
+        ray.origin = vec3(0.0f, 0.0f, 0.0f);
+        ray.color = vec3(0.0f, 0.0f, 0.0f);
+
+        RayIntersect currentIntersect = findClosestIntersect(ray);
+        if (currentIntersect.exists) {
+            ray = currentIntersect.new_ray;
+        }
     }
+    color = vec4(ray.color.x, ray.color.y, ray.color.z, 1.0f);
 }

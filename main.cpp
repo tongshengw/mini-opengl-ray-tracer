@@ -216,7 +216,6 @@ public:
 
         GLint u_RandSeedLocation = glGetUniformLocation(graphicsPipelineShaders, "u_RandSeed");
         int RandSeed = rand() * 100;
-        std::cout << RandSeed << std::endl;
         glUniform1i(u_RandSeedLocation, RandSeed);
     }
     
