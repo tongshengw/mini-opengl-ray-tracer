@@ -35,9 +35,10 @@ uint TausStep(uint state) {
 }
 
 vec3 randomDirection(uint randomSeed) {
-    bool found = false;
-    uint prevSeed;
-    while(!found) {
+    uint prevSeed = randomSeed;
+    const int MAX_ITERATIONS = 100;
+    
+    for(int i = 0; i < MAX_ITERATIONS; i++) {
         uint r1 = TausStep(prevSeed);
         prevSeed = r1;
         uint r2 = TausStep(prevSeed);
@@ -45,17 +46,22 @@ vec3 randomDirection(uint randomSeed) {
         uint r3 = TausStep(prevSeed);
         prevSeed = r3;
 
-        float f1 = r1 * (1.0/float(0xffffffffu));
-        float f2 = r2 * (1.0/float(0xffffffffu));
-        float f3 = r3 * (1.0/float(0xffffffffu));
+        // Map to [-1, 1] range consistently
+        float x = r1 * (2.0/float(0xffffffffu)) - 1.0;
+        float y = r2 * (2.0/float(0xffffffffu)) - 1.0;
+        float z = r3 * (2.0/float(0xffffffffu)) - 1.0;
 
-        vec3 cur = vec3(f1, f2, f3);
-        if (f1*f1 + f2*f2 + f3*f3 <= 1) {
-            vec3 output = normalize(cur);
-            found = true;
-            return output;
+        vec3 point = vec3(x, y, z);
+        float lenSq = dot(point, point);
+        
+        // Check if point is inside unit sphere and not at origin
+        if (lenSq <= 1.0 && lenSq > 0.0001) {
+            return normalize(point);
         }
     }
+    
+    // Default fallback direction if no valid direction found
+    return vec3(0.0, 1.0, 0.0);
 }
 
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html
