@@ -13,7 +13,6 @@ struct Sphere {
 uniform Sphere u_Spheres[3];
 uniform uint u_RandSeed;
 
-
 struct Ray {
     vec3 direction;
     vec3 origin;
@@ -33,6 +32,30 @@ uint TausStep(uint state) {
     uint b = (((state << 13) ^ state) >> 19);
     state = (((state & 4294967294u) << 12) ^ b);
     return state;
+}
+
+vec3 randomDirection(uint randomSeed) {
+    bool found = false;
+    uint prevSeed;
+    while(!found) {
+        uint r1 = TausStep(prevSeed);
+        prevSeed = r1;
+        uint r2 = TausStep(prevSeed);
+        prevSeed = r2;
+        uint r3 = TausStep(prevSeed);
+        prevSeed = r3;
+
+        float f1 = r1 * (1.0/float(0xffffffffu));
+        float f2 = r2 * (1.0/float(0xffffffffu));
+        float f3 = r3 * (1.0/float(0xffffffffu));
+
+        vec3 cur = vec3(f1, f2, f3);
+        if (f1*f1 + f2*f2 + f3*f3 <= 1) {
+            vec3 output = normalize(cur);
+            found = true;
+            return output;
+        }
+    }
 }
 
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html
@@ -88,37 +111,9 @@ RayIntersect findClosestIntersect(Ray ray) {
     return minIntersect;
 }
 
-vec3 randomDirection(uint randomSeed) {
-    bool found = false;
-    uint prevSeed;
-    while(!found) {
-        uint r1 = TausStep(prevSeed);
-        prevSeed = r1;
-        uint r2 = TausStep(prevSeed);
-        prevSeed = r2;
-        uint r3 = TausStep(prevSeed);
-        prevSeed = r3;
-
-        float f1 = r1 * (1.0/float(0xffffffffu));
-        float f2 = r2 * (1.0/float(0xffffffffu));
-        float f3 = r3 * (1.0/float(0xffffffffu));
-
-        vec3 cur = vec3(f1, f2, f3);
-        if (f1*f1 + f2*f2 + f3*f3 <= 1) {
-            vec3 output = normalize(cur);
-            found = true;
-            return output;
-        }
-    }
-}
-
 void main() {
     uint frameSeed = uint(gl_FragCoord.x * gl_FragCoord.y + gl_FragCoord.y);
     uint currentSeed = frameSeed + u_RandSeed;
-    
-    currentSeed = TausStep(currentSeed);
-    float curRand = currentSeed * (1.0 / float(0xffffffffu));
-    
     
     Ray ray;
     ray.direction = vec3((2.0/1280) * gl_FragCoord.x - 1, (2*0.5625/720) * gl_FragCoord.y - 0.5625, -1);
