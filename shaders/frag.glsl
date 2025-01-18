@@ -101,13 +101,14 @@ RayIntersect intersectSphere(Ray ray, Sphere sphere, uint randomSeed) {
         intersect.new_ray.origin = intersect.pos;
         
         // Set new ray properties
-        intersect.new_ray.brightness = ray.brightness * 0.5;  // Light falloff
-        intersect.new_ray.color = ray.color * sphere.color;   // Surface color interaction
+        // intersect.new_ray.brightness = ray.brightness * 0.5;  // Light falloff
+        intersect.new_ray.color = 0.5 * ray.color;   // Surface color interaction
         
         // Add emission contribution
-        if (sphere.emmission > 0.0) {
-            intersect.new_ray.color += sphere.color * sphere.emmission;
-        }
+        // if (sphere.emmission > 0.0) {
+            // intersect.new_ray.color += 0.5 * ray.color;
+            // intersect.new_ray.brightness += sphere.emmission;
+        // }
         
         return intersect;
     }
@@ -138,15 +139,16 @@ void main() {
     ray.direction = vec3((2.0/1280) * gl_FragCoord.x - 1, (2*0.5625/720) * gl_FragCoord.y - 0.5625, -1);
     ray.direction = normalize(ray.direction);
     ray.origin = vec3(0.0f, 0.0f, 0.0f);
-    ray.color = vec3(0.0f, 0.0f, 0.0f);     // Start with black
+    ray.color = vec3(1.0f, 1.0f, 1.0f);
     ray.brightness = vec3(1.0f, 1.0f, 1.0f); // Start with full brightness
 
     vec3 finalColor = vec3(0.0f);
-    for (int bounce = 0; bounce < 5; bounce++) {
+    for (int bounce = 0; bounce < 3; bounce++) {
         RayIntersect currentIntersect = findClosestIntersect(ray, currentSeed);
         if (currentIntersect.exists) {
             ray = currentIntersect.new_ray;
-            finalColor += ray.color * ray.brightness;  // Accumulate color weighted by brightness
+            // finalColor += ray.color * ray.brightness;  // Accumulate color weighted by brightness
+            finalColor = ray.color;
         }
     }
 
