@@ -182,14 +182,14 @@ public:
         std::array<v4<float>, 3> worldCoordSpheres;
         worldCoordSpheres[0] = {0, 0, -10, 1};
         worldCoordSpheres[1] = {10, 0, -10, 1};
-        worldCoordSpheres[2] = {-5, 0, -20, 1};
+        worldCoordSpheres[2] = {0, -40, -20, 1};
 
         std::array<v3<float>, 3> sphereColors;
         sphereColors[0] = {1, 0, 0};
         sphereColors[1] = {0, 1, 0};
         sphereColors[2] = {0, 1, 1};
 
-        std::array<float, 3> sphereRadii{1, 1, 1};
+        std::array<float, 3> sphereRadii{1, 1, 30};
         std::array<float, 3> sphereEmmission{1, 0, 0};
 
         for (int i = 0; i < 3; i++) {

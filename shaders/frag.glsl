@@ -88,21 +88,20 @@ RayIntersect intersectSphere(Ray ray, Sphere sphere, uint randomSeed) {
         } else if (solution2 < 0) {
             solution = solution1;
         } else {
-            float solution = min(solution1, solution2);
+            solution = min(solution1, solution2);
         }
         intersect.exists = true;
         intersect.dst = solution;
-        intersect.pos = intersect.dst * ray.direction + ray.origin;
+        intersect.pos = solution * ray.direction + ray.origin;
         intersect.normal = normalize(intersect.pos - sphere.location);
-        intersect.new_ray.direction = randomDirection(randomSeed);
-        if (dot(intersect.new_ray.direction, intersect.normal) < 0.0) {
-            intersect.new_ray.direction = -intersect.new_ray.direction;
-        }
+        // intersect.new_ray.direction = randomDirection(randomSeed);
+        // if (dot(intersect.new_ray.direction, intersect.normal) < 0.0) {
+            // intersect.new_ray.direction = -intersect.new_ray.direction;
+        // }
         intersect.new_ray.origin = intersect.pos;
         
         // Set new ray properties
-        // intersect.new_ray.brightness = ray.brightness * 0.5;  // Light falloff
-        intersect.new_ray.color = 0.5 * ray.color;   // Surface color interaction
+        intersect.new_ray.color = intersect.normal * 0.5 + 0.5;   // Surface color interaction
         
         // Add emission contribution
         // if (sphere.emmission > 0.0) {
@@ -116,14 +115,12 @@ RayIntersect intersectSphere(Ray ray, Sphere sphere, uint randomSeed) {
 
 RayIntersect findClosestIntersect(Ray ray, uint randomSeed) {
     float minIntersectDistance = 1000;
-    int closestSphereIndex = -1;
     RayIntersect minIntersect;
     minIntersect.exists = false;
 
     for (int i = 0; i < 3; i++) {
         RayIntersect currentIntersect = intersectSphere(ray, u_Spheres[i], randomSeed);
         if (currentIntersect.exists && currentIntersect.dst < minIntersectDistance) {
-            closestSphereIndex = i;
             minIntersectDistance = currentIntersect.dst;
             minIntersect = currentIntersect;
         }
@@ -133,7 +130,7 @@ RayIntersect findClosestIntersect(Ray ray, uint randomSeed) {
 
 void main() {
     uint frameSeed = uint(gl_FragCoord.x * gl_FragCoord.y + gl_FragCoord.y);
-    uint currentSeed = frameSeed + u_RandSeed;
+    uint currentSeed = frameSeed;
     
     Ray ray;
     ray.direction = vec3((2.0/1280) * gl_FragCoord.x - 1, (2*0.5625/720) * gl_FragCoord.y - 0.5625, -1);
@@ -143,7 +140,7 @@ void main() {
     ray.brightness = vec3(1.0f, 1.0f, 1.0f); // Start with full brightness
 
     vec3 finalColor = vec3(0.0f);
-    for (int bounce = 0; bounce < 3; bounce++) {
+    for (int bounce = 0; bounce < 1; bounce++) {
         RayIntersect currentIntersect = findClosestIntersect(ray, currentSeed);
         if (currentIntersect.exists) {
             ray = currentIntersect.new_ray;
