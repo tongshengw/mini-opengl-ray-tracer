@@ -51,6 +51,7 @@ public:
     void world_rotate_y(float n) {
         Quaternion q({0, 1, 0}, 0.01*n);
         rotation = rotation * q;
+        rotation.normalise();
     }
 
     v3<float> get_pos() const {
