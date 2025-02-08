@@ -28,6 +28,7 @@ private:
     float farPlane;
 
     v3<float> initial_orientation{0, 0, -1};
+    v3<float> initial_right{1, 0, 0};
 
 public:
     Camera()
@@ -40,6 +41,16 @@ public:
         v3<float> direction_vector = rotation.rotate_vector(initial_orientation);
 
         pos = pos + n * direction_vector;
+    }
+    void move_right(float n) {
+        v3<float> direction_vector = rotation.rotate_vector(initial_right);
+
+        pos = pos + n * direction_vector;
+    }
+
+    void world_rotate_y(float n) {
+        Quaternion q({0, 1, 0}, 0.01*n);
+        rotation = rotation * q;
     }
 
     v3<float> get_pos() const {
@@ -340,6 +351,18 @@ int main(int argc, char** argv){
         }
         if (state[SDL_SCANCODE_DOWN]) {
             screen.camera.move_forwards(-0.01f);
+        }
+        if (state[SDL_SCANCODE_RIGHT]) {
+            screen.camera.move_right(0.01f);
+        }
+        if (state[SDL_SCANCODE_LEFT]) {
+            screen.camera.move_right(-0.01f);
+        }
+        if (state[SDL_SCANCODE_D]) {
+            screen.camera.world_rotate_y(0.01f);
+        }
+        if (state[SDL_SCANCODE_A]) {
+            screen.camera.world_rotate_y(-0.01f);
         }
 
         screen.PreDraw();
