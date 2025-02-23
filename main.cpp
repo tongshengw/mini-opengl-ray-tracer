@@ -7,7 +7,6 @@
 #include <fstream>
 #include <cmath>
 #include <iostream>
-#include <ratio>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -21,7 +20,7 @@
 class Camera {
 private:
     v3<float> pos;
-    Quaternion rotation;
+    Quaternion rotation = {std::array<float, 3>{0, 0, 1}, M_PI};
     float hFOV;
     float aspectRatio;
     float closePlane;
@@ -39,6 +38,7 @@ public:
 
     void move_forwards(float n) {
         v3<float> direction_vector = rotation.rotate_vector(initial_orientation);
+        std::cout << direction_vector << std::endl;
 
         pos = pos + n * direction_vector;
     }
@@ -48,9 +48,22 @@ public:
         pos = pos + n * direction_vector;
     }
 
-    void world_rotate_y(float n) {
-        Quaternion q({0, 1, 0}, 0.01*n);
-        rotation = rotation * q;
+    void local_rotate_y(float n) {
+        v3<float> localY = rotation.rotate_vector({0,1,0});
+        Quaternion q(localY, n);
+        
+        q.normalise();
+        // TODO: no idea why using 2 q works lmfao figure this out and fix this
+        rotation = rotation * q * q;
+        rotation.normalise();
+    }
+
+    void local_rotate_x(float n) {
+        v3<float> localX = rotation.rotate_vector({1,0,0});
+        Quaternion q(localX, n);
+        q.normalise();
+        // TODO: no idea why using 2 q works lmfao figure this out and fix this
+        rotation = rotation * q * q;
         rotation.normalise();
     }
 
@@ -360,10 +373,16 @@ int main(int argc, char** argv){
             screen.camera.move_right(-0.01f);
         }
         if (state[SDL_SCANCODE_D]) {
-            screen.camera.world_rotate_y(0.01f);
+            screen.camera.local_rotate_y(0.001f);
         }
         if (state[SDL_SCANCODE_A]) {
-            screen.camera.world_rotate_y(-0.01f);
+            screen.camera.local_rotate_y(-0.001f);
+        }
+        if (state[SDL_SCANCODE_W]) {
+            screen.camera.local_rotate_x(0.001f);
+        }
+        if (state[SDL_SCANCODE_S]) {
+            screen.camera.local_rotate_x(-0.001f);
         }
 
         screen.PreDraw();

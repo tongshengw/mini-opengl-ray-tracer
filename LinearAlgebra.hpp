@@ -4,6 +4,7 @@
 #include <array>
 #include <cmath>
 #include <iostream>
+#include <ostream>
 
 template<typename T>
 class v4; // Forward declaration
@@ -180,12 +181,14 @@ public:
     Quaternion(const std::array<float, 3> &imaginary, float theta)
         : Quaternion(sin(theta/2), imaginary[0]*cos(theta/2), imaginary[1]*cos(theta/2), imaginary[2]*cos(theta/2)) {}
 
+    Quaternion(const v3<float> &i, float theta)
+        : Quaternion(std::array<float, 3>{i.x, i.y, i.z}, theta) {}
+
     void normalise() {
-        float length = sqrt(pow(r, 2)+pow(i, 2)+pow(j, 2)+pow(k, 2));
-        r /= length;
-        i /= length;
-        j /= length;
-        k /= length;
+        r /= magnitude();
+        i /= magnitude();
+        j /= magnitude();
+        k /= magnitude();
     }
 
     float magnitude() const {
@@ -224,11 +227,16 @@ public:
         return output;
     }
 
-    v3<float> rotate_vector(v3<float> rhs) const {
+    v3<float> rotate_vector(const v3<float> &rhs) const {
         Quaternion p{0, rhs.x, rhs.y, rhs.z};
         Quaternion result = (*this) * p * conjugate();
         return {result.i, result.j, result.k}; 
     }
 };
+
+std::ostream & operator<<(std::ostream & os, const Quaternion &q) {
+    os << q.r << ", " << q.i << ", " << q.j << ", " << q.k << std::endl;
+    return os;
+}
 
 #endif
